@@ -384,7 +384,7 @@ class OutlineTabTestViews(BaseCourseHomeTests):
         seq_block_id = next(
             block_id
             for block_id, block in blocks.items()
-            if block['type']=='sequential'
+            if block['type'] == 'sequential'
         )
 
         # With Learning Sequences active and a course outline loaded, the same
