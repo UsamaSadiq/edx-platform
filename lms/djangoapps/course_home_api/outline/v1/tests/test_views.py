@@ -381,7 +381,11 @@ class OutlineTabTestViews(BaseCourseHomeTests):
         response = self.client.get(self.url)
         assert response.status_code == 200
         blocks = response.data['course_blocks']['blocks']
-        assert 'block-v1:org.0+course_0+Run_0+type@sequential+block@sequential_2' in blocks
+        seq_block_id = next(
+            block_id
+            for block_id, block in blocks.items()
+            if block['type']=='sequential'
+        )
 
         # With Learning Sequences active and a course outline loaded, the same
         # sequence is removed.
@@ -400,5 +404,4 @@ class OutlineTabTestViews(BaseCourseHomeTests):
             replace_course_outline(new_learning_seq_outline)
             response = self.client.get(self.url)
             blocks = response.data['course_blocks']['blocks']
-            print(blocks)
-            assert 'block-v1:org.0+course_0+Run_0+type@sequential+block@sequential_2' not in blocks
+            assert seq_block_id not in blocks
