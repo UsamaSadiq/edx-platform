@@ -9,6 +9,7 @@ import pytest
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.paginator import Paginator
 from django.test import TestCase
 from django.test.utils import override_settings
 from opaque_keys.edx.locator import CourseKey, CourseLocator
@@ -539,6 +540,26 @@ class TemporaryMigrationTests(ModuleStoreTestCase):
         self.u2 = UserFactory.create()
         self.u3 = UserFactory.create()
 
+    def _migrate(self):
+        """
+        Migrate the data
+        """
+        whitelisted = CertificateWhitelist.objects.all().order_by('id')
+        paginator = Paginator(whitelisted, 1)
+
+        for page_num in paginator.page_range:
+            page = paginator.page(page_num)
+
+            for w in page.object_list:
+                CertificateAllowlist.objects.update_or_create(
+                    user_id=w.user_id,
+                    course_id=w.course_id,
+                    defaults={
+                        'allowlist': w.whitelist,
+                        'notes': w.notes,
+                    }
+                )
+
     def test_migration(self):
         """
         Temporary test for the allowlist data migration
@@ -551,26 +572,26 @@ class TemporaryMigrationTests(ModuleStoreTestCase):
         CertificateAllowlistFactory.create(
             user=self.u1,
             course_id=self.key,
-            whitelist=False
+            whitelist=False,
+            notes='nope'
         )
         CertificateAllowlistFactory.create(
             user=self.u2,
             course_id=self.key,
         )
 
-        whitelisted = CertificateWhitelist.objects.all()
-        for w in whitelisted:
-            CertificateAllowlist.objects.update_or_create(
-                user_id=w.user_id,
-                course_id=w.course_id,
-                defaults={
-                    'allowlist': w.whitelist,
-                    'notes': w.notes,
-                }
-            )
+        self._migrate()
 
+        whitelisted = CertificateWhitelist.objects.all()
         allowlisted = CertificateAllowlist.objects.all()
         assert len(whitelisted) == len(allowlisted)
+
+        a = CertificateAllowlist.objects.get(user_id=self.u1.id)
+        assert a.allowlist is False
+        assert a.notes == 'nope'
+
+        a = CertificateAllowlist.objects.get(user_id=self.u2.id)
+        assert a.allowlist is True
 
     def test_migration_empty(self):
         """
@@ -585,17 +606,26 @@ class TemporaryMigrationTests(ModuleStoreTestCase):
             user=self.u2,
             course_id=self.key,
         )
+        CertificateAllowlistFactory.create(
+            user=self.u3,
+            course_id=self.key,
+        )
+
+        self._migrate()
 
         whitelisted = CertificateWhitelist.objects.all()
-        for w in whitelisted:
-            CertificateAllowlist.objects.update_or_create(
-                user_id=w.user_id,
-                course_id=w.course_id,
-                defaults={
-                    'allowlist': w.whitelist,
-                    'notes': w.notes,
-                }
-            )
+        allowlisted = CertificateAllowlist.objects.all()
+        assert len(whitelisted) == len(allowlisted)
 
+    def test_migration_both_empty(self):
+        """
+        Temporary test for the allowlist data migration when both models are empty
+        """
+        whitelisted = CertificateWhitelist.objects.all()
+        assert len(whitelisted) == 0
+
+        self._migrate()
+
+        whitelisted = CertificateWhitelist.objects.all()
         allowlisted = CertificateAllowlist.objects.all()
         assert len(whitelisted) == len(allowlisted)
