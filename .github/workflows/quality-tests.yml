@@ -1,9 +1,10 @@
 name: CI
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
-      - master
+      - '**'
   push:
     branches:
       - master
@@ -11,7 +12,7 @@ on:
 jobs:
   run_tests:
     name: Quality
-    runs-on: ${{ matrix.os }}
+    runs-on: aws_test_runner
     strategy:
       matrix:
         os: [ ubuntu-20.04 ]
