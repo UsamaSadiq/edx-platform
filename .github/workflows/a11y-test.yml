@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - master
+      - '**'
   push:
     branches:
       - master
@@ -72,19 +72,19 @@ jobs:
         sudo service memcached start
         sudo /etc/init.d/mysql start
 
-    - name: Reset mysql password
-      run: |
-        cat <<EOF | mysql -h 127.0.0.1 -u root --password=root
-          UPDATE mysql.user SET authentication_string = null WHERE user = 'root';
-          FLUSH PRIVILEGES;
-        EOF
+#    - name: Reset mysql password
+#      run: |
+#        cat <<EOF | mysql -h 127.0.0.1 -u root --password=root
+#          UPDATE mysql.user SET authentication_string = null WHERE user = 'root';
+#          FLUSH PRIVILEGES;
+#        EOF
 
     - name: Run Tests
       env:
         TEST_SUITE: a11y
         DB_DATABASE: edxtest
         DB_USER: root
-        DB_PASSWORD: ''
+        DB_PASSWORD: root
       run: |
         sudo service mysql restart
         SELENIUM_BROWSER=chrome BOKCHOY_HEADLESS=true paver test_a11y

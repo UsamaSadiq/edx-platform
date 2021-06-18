@@ -22,13 +22,13 @@ doCheckVars() {
 
     elif [ -n "$JENKINS_HOME" ] ; then
         source scripts/jenkins-common.sh
-        SCRIPT_TO_RUN=scripts/generic-ci-tests.sh
+#        SCRIPT_TO_RUN=scripts/generic-ci-tests.sh
     fi
 }
 
 # Determine the CI system for the environment
 doCheckVars
-
+#
 # Run appropriate CI system script
 if [ -n "$SCRIPT_TO_RUN" ] ; then
     $SCRIPT_TO_RUN

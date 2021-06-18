@@ -1,9 +1,10 @@
 name: CI
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
-      - master
+      - '**'
   push:
     branches:
       - master
@@ -29,16 +30,16 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Install Firefox 61.0
-      run: |
-        sudo apt-get purge firefox
-        wget "https://ftp.mozilla.org/pub/firefox/releases/61.0/linux-x86_64/en-US/firefox-61.0.tar.bz2"
-        tar -xjf firefox-61.0.tar.bz2
-        sudo mv firefox /opt/firefox
-        sudo ln -s /opt/firefox/firefox /usr/bin/firefox
+#    - name: Install Firefox 61.0
+#      run: |
+#        sudo apt-get -y purge firefox
+#        wget "https://ftp.mozilla.org/pub/firefox/releases/61.0/linux-x86_64/en-US/firefox-61.0.tar.bz2"
+#        tar -xjf firefox-61.0.tar.bz2
+#        sudo mv firefox /opt/firefox
+#        sudo ln -s /opt/firefox/firefox /usr/bin/firefox
 
     - name: Install Required System Packages
-      run: sudo apt-get update && sudo apt-get install libxmlsec1-dev ubuntu-restricted-extras xvfb
+      run: sudo apt-get -y update && sudo apt-get install -y libxmlsec1-dev ubuntu-restricted-extras xvfb
 
     - name: Setup Python
       uses: actions/setup-python@v2
