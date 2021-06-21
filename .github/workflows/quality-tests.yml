@@ -12,7 +12,7 @@ on:
 jobs:
   run_tests:
     name: Quality
-    runs-on: aws_test_runner
+    runs-on: aws_quality_runner
     strategy:
       matrix:
         os: [ ubuntu-20.04 ]
