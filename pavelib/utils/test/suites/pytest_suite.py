@@ -4,6 +4,7 @@ Classes used for defining and running pytest test suites
 
 
 import os
+import re
 from glob import glob
 
 from pavelib.utils.envs import Env
@@ -124,6 +125,7 @@ class SystemTestSuite(PytestSuite):
         super().__init__(*args, **kwargs)
         self.eval_attr = kwargs.get('eval_attr', None)
         self.test_id = kwargs.get('test_id', self._default_test_id)
+        self.modules_path = kwargs.get('modules_path', None)
         self.fasttest = kwargs.get('fasttest', False)
         self.disable_migrations = kwargs.get('disable_migrations', True)
         self.processes = kwargs.get('processes', None)
@@ -146,7 +148,6 @@ class SystemTestSuite(PytestSuite):
         if self.run_under_coverage:
             cmd.append('--cov')
             cmd.append('--cov-report=')
-
         return cmd
 
     @property
@@ -209,9 +210,25 @@ class SystemTestSuite(PytestSuite):
             cmd.append(f"-a '{self.eval_attr}'")
 
         cmd.extend(self.passthrough_options)
-        cmd.append(self.test_id)
+        if self.modules_path:
+            # get modules tests paths
+            cmd.append(self._get_module_tests())
+        else:
+            cmd.append(self.test_id)
 
         return self._under_coverage_cmd(cmd)
+
+    def _get_module_tests(self):
+        """
+        Generate list of all the tests from the given modules
+        """
+        dir_root = self.modules_path.split('[')[0]
+        dir_regex = ''
+        if 'djangoapps' in self.modules_path:
+            dir_regex = self.modules_path.split('djangoapps/')[1]
+        modules_list = [dir for dir in os.listdir(dir_root) if re.match(dir_regex, dir)]
+        test_paths = [dir_root+path for path in modules_list]
+        return ' '.join(test_paths)
 
     @property
     def _default_test_id(self):

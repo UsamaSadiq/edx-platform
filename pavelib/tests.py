@@ -30,6 +30,7 @@ __test__ = False  # do not collect
 @cmdopts([
     ("system=", "s", "System to act on"),
     ("test-id=", "t", "Test id"),
+    ("modules_path=", "d", "Tests modules path"),
     ("fail-fast", "x", "Fail suite on first failed test"),
     ("fasttest", "a", "Run without collectstatic"),
     make_option(
@@ -106,6 +107,7 @@ def test_system(options, passthrough_options):
     """
     system = getattr(options, 'system', None)
     test_id = getattr(options, 'test_id', None)
+    modules_path = getattr(options, 'modules_path', None)
     django_version = getattr(options, 'django_version', None)
 
     assert system in (None, 'lms', 'cms')
@@ -116,7 +118,17 @@ def test_system(options, passthrough_options):
             'compare_branch': options.test_system.with_wtw
         })
 
-    if test_id:
+    if modules_path:
+        system = modules_path.split('/')[0]
+        if system in ['common', 'openedx']:
+            system = 'lms'
+        system_tests = [suites.SystemTestSuite(
+            system,
+            passthrough_options=passthrough_options,
+            **options.test_system
+        )]
+        print(system_tests)
+    elif test_id:
         # Testing a single test ID.
         # Ensure the proper system for the test id.
         if not system:
