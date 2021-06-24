@@ -12,7 +12,7 @@ on:
 jobs:
   run_tests:
     name: JS
-    runs-on: aws_test_runner
+    runs-on: aws_js_runner
     strategy:
       matrix:
         os: [ ubuntu-20.04 ]
