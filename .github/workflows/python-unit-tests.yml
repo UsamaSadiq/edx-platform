@@ -11,6 +11,7 @@ on:
 
 jobs:
   run_unit_tests:
+    name: Python Unit Tests
     continue-on-error: true
     runs-on: aws_python_runner
     strategy:
@@ -59,50 +60,6 @@ jobs:
         run: |
           paver test_system -d $TEST_MODULE --disable_capture
 
-  run_lib_tests:
-    runs-on: aws_python_runner
-    strategy:
-      matrix:
-        os: [ self.hosted ]
-        python-version: [ 3.8 ]
-    steps:
-      - uses: actions/checkout@v1
-      - name: setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Get pip cache dir
-        id: pip-cache-dir
-        run: |
-          echo "::set-output name=dir::$(pip cache dir)"
-
-      - name: Cache pip dependencies
-        id: cache-dependencies
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/edx/development.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
-
-      - name: Install Required Python Dependencies
-        env:
-          PIP_SRC_DIR: ${{ runner.temp }}
-        run: |
-          pip install -r requirements/pip.txt
-          pip install -r requirements/edx/development.txt --src $PIP_SRC_DIR
-
-      - name: Run Python lib Tests
-        env:
-          TEST_SUITE: python
-          PIP_SRC_DIR: ${{ runner.temp }}
-        run: |
-          paver test_lib --disable_capture
-
-  save_artifacts:
-    needs: [run_unit_tests, run_lib_tests]
-    runs-on: aws_python_runner
-    steps:
       - name: Save Job Artifacts
         uses: actions/upload-artifact@v2
         with:
