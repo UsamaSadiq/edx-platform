@@ -11,7 +11,7 @@ on:
 
 jobs:
   run_unit_tests:
-    name: Python Unit Tests
+    name: Python Tests
     continue-on-error: true
     runs-on: aws_python_runner
     strategy:
@@ -19,11 +19,12 @@ jobs:
         os: [ self.hosted ]
         python-version: [ 3.8 ]
         tests_module: [
-            "lms/djangoapps/[b|d|e].*", "lms/djangoapps/[c][a-n].*",
-            "lms/djangoapps/[c][o-z].*", "lms/djangoapps/[g-z].*",
-            "cms/djangoapps/[a-z].*", "common/djangoapps/[a-p].*",
-            "common/djangoapps/[q-z].*", "openedx/core/djangoapps/[a-c].*",
-            "openedx/core/djangoapps/[d-p].*", "openedx/core/djangoapps/[q-z].*",
+            "lms/djangoapps/[b].*", "lms/djangoapps/[d-e].*",
+            "lms/djangoapps/[c](?!ourseware).*", "lms/djangoapps/[c]ourseware.*",
+            "lms/djangoapps/[g-m].*", "lms/djangoapps/[n-z].*",
+            "cms/djangoapps/[a-z].*", "common/djangoapps/[a-z].*",
+            "openedx/core/djangoapps/[a-c].*", "openedx/core/djangoapps/[d-z].*",
+            "lib",
         ]
     steps:
       - uses: actions/checkout@v1
@@ -52,13 +53,23 @@ jobs:
           pip install -r requirements/pip.txt
           pip install -r requirements/edx/development.txt --src $PIP_SRC_DIR
 
-      - name: Run Python Tests
+      - name: Run Unit Tests
+        if: contains(matrix.tests_module, 'djangoapps')
         env:
           TEST_MODULE: ${{ matrix.tests_module }}
           TEST_SUITE: python
           PIP_SRC_DIR: ${{ runner.temp }}
         run: |
           paver test_system -d $TEST_MODULE --disable_capture
+
+      - name: Run Lib Tests
+        if: contains(matrix.tests_module, 'djangoapps') != true
+        env:
+          TEST_MODULE: ${{ matrix.tests_module }}
+          TEST_SUITE: python
+          PIP_SRC_DIR: ${{ runner.temp }}
+        run: |
+          paver test_lib --disable_capture
 
       - name: Save Job Artifacts
         uses: actions/upload-artifact@v2
