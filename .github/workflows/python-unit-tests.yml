@@ -19,10 +19,12 @@ jobs:
         os: [ self.hosted ]
         python-version: [ 3.8 ]
         tests_module: [
-            "lms/djangoapps/[b].*", "lms/djangoapps/[d-e].*",
+            "lms/djangoapps/[a|b|e].*",
             "lms/djangoapps/[c](?!ourseware).*", "lms/djangoapps/[c]ourseware.*",
-            "lms/djangoapps/[g-m].*", "lms/djangoapps/[n-z].*",
-            "cms/djangoapps/[a-z].*", "common/djangoapps/[a-z].*",
+            "lms/djangoapps/[d]iscussion.*", "lms/djangoapps/[d](?!iscussion).*",
+            "lms/djangoapps/[f-m].*", "lms/djangoapps/[n-z].*",
+            "cms/djangoapps/[a-c].*", "cms/djangoapps/[e-z].*",
+            "common/djangoapps/[a-z].*",
             "openedx/core/djangoapps/[a-c].*", "openedx/core/djangoapps/[d-z].*",
             "lib",
         ]
