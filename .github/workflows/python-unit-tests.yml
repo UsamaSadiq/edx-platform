@@ -19,14 +19,12 @@ jobs:
         os: [ self.hosted ]
         python-version: [ 3.8 ]
         tests_module: [
-            "lms/djangoapps/[a|b|e].*",
+            "lms/djangoapps/[a|b|e].*", "lms/djangoapps/[d].*",
             "lms/djangoapps/[c](?!ourseware).*", "lms/djangoapps/[c]ourseware.*",
-            "lms/djangoapps/[d]iscussion.*", "lms/djangoapps/[d](?!iscussion).*",
             "lms/djangoapps/[f-m].*", "lms/djangoapps/[n-z].*",
-            "cms/djangoapps/[a-c].*", "cms/djangoapps/[e-z].*",
-            "common/djangoapps/[a-z].*",
+            "cms/djangoapps/[a-z].*", "common/djangoapps/[a-z].*",
             "openedx/core/djangoapps/[a-c].*", "openedx/core/djangoapps/[d-z].*",
-            "lib",
+            "common/lib", "pavelib/paver_tests",
         ]
     steps:
       - uses: actions/checkout@v1
@@ -71,7 +69,7 @@ jobs:
           TEST_SUITE: python
           PIP_SRC_DIR: ${{ runner.temp }}
         run: |
-          paver test_lib --disable_capture
+          paver test_lib -t $TEST_MODULE --disable_capture
 
       - name: Save Job Artifacts
         uses: actions/upload-artifact@v2
