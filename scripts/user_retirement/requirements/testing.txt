@@ -18,7 +18,7 @@ boto3==1.40.62
     # via
     #   -r scripts/user_retirement/requirements/base.txt
     #   moto
-botocore==1.40.62
+botocore==1.40.76
     # via
     #   -r scripts/user_retirement/requirements/base.txt
     #   boto3
